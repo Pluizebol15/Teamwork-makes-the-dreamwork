@@ -5,7 +5,7 @@ import game_objects as gob
 # window + program setup
 pg.init()  # start pygame
 screen = pg.display.set_mode(settings.screen_size)
-player = gob.newentity('player', (800-120, 350), 1, graphics = pg.image.load(r"./PS1.png"), graphics_size = (240,240)) # creates a new entity in the foreground
+player = gob.newentity('player', (800-72, 350+72), 1, graphics = pg.image.load(r"./PS3.png"), graphics_size = (144,144)) # creates a new entity in the foreground
 background = gob.newentity('background', (0,-350), 0, graphics = pg.image.load(r"./bg2.png"), graphics_size = (1600*2,1600*2))  # creates a background entity
 
 
