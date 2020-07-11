@@ -37,19 +37,14 @@ class world:
 game_world = world()
 # class that contains neccecary information to draw something on the screen
 class entity:
-    def __init__(self, name, location, layer, graphics=[None,None,None,None], graphics_size=None, lifetime=None):
+    def __init__(self, name, location, layer, graphics=[None], graphics_size=None, lifetime=None):
         if graphics and not graphics_size: raise ValueError ("graphics specified but no size was given!")
         self.name = name  # name of the entity
         self.loc = [location[0], location[1]]  # coördinates of the entity [x, y]
         self.direction = "UP"  # facing direction of the entity, defealt to up
         self.center = [location[0]+graphics_size[0]/2, location[1]+graphics_size[1]/2]  # center of the entity
         self.size = (graphics_size[0], graphics_size[1])  # size of the graphics images in forward position
-        self.graphics = {  # optional graphics for the entity
-            "LEFT"  : graphics[0],  # list containing images for left move
-            "RIGHT" : graphics[1],  # list containing images for right move
-            "UP"    : graphics[2],  # list containing images for up move
-            "DOWN"  : graphics[3]  # list containing images for down move
-        }
+        self.graphics = graphics  # optional list of spites for animation/drawing
         self.age = None # integer nr of frames since the object appeared on the screen
         self.cycle_cur = 0  # frame in an optional cycle that should be drawn
         self.cycle_len = 9  # length of the optional cycle that should be drawn (defealt 9)
@@ -74,7 +69,7 @@ class collisob(entity):
             (self.loc[0], self.loc[1]+size[1])  # left lower corner
         ]
 
-def newentity(name, location, layer, graphics=[None,None,None,None], graphics_size=None, lifetime=None):
+def newentity(name, location, layer, graphics=[None], graphics_size=None, lifetime=None):
     global entity_world
     newitem = entity(name, location, layer, graphics, graphics_size, lifetime)  # create new entity
     entity_world.append(newitem)  # append entity to world
