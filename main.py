@@ -37,10 +37,23 @@ def move_screenbound(entity, x=0, y=0):  # move the background sprite in opposit
     if (entity.loc[1] > 0) or (entity.loc[1] < -1*(entity.size[1]-settings.screen_size[1])):
         entity.loc[1] = entity.loc[1] + y*settings.player_speed  # change y back
         moved = False
-    #print(f"moved: {moved}")
+
     if moved:
         if gob.game_world.frame == 3: player.cycle_update()  # update which sprite to render in animation cycle
     else: player.cycle_cur = 0  # reset animation cycle if player didn't move
+
+def rotate(entity, newdirection):
+    angles = {"UP" : 0, "RIGHT" : -90, "DOWN" : 180, "LEFT" : 90}  # angle of the sprite, clockwise
+    angle_start = angles[entity.direction]  # store the current direction as angle
+    entity.direction = newdirection  # updtate the direction
+    angle_new = angles[entity.direction]  # store the new direction as angle
+    angle_dif = angle_new - angle_start  # compute the angle to rotate over, by computing the angle difference in direction
+    if angle_dif == 0: return  # don't rotate if there is no direction change
+    print(f"rotate: angle = {angle_dif}")
+    for indx, sprite in enumerate(entity.graphics):
+        #print(f"\trotating sprite {indx}. {sprite} ",end='...')
+        entity.graphics[indx] = pg.transform.rotate(sprite, angle_dif)  # rotate the sprite to match new orientation
+        #print("Complete!")
 
 def draw(): # frame drawing
     screen.fill((255,0,255))  # removes all drawings
@@ -77,20 +90,20 @@ while run:  # actual loop
         pressed_keys = pg.key.get_pressed() # list of all keys that are pressed
         if pressed_keys[pg.K_UP]:
             move_y = -1
-            player.direction = "UP"
+            rotate(player, "UP")
         elif pressed_keys[pg.K_DOWN]:
             move_y = 1
-            player.direction = "UP"
+            rotate(player, "DOWN")
         else: move_y = 0
         if pressed_keys[pg.K_LEFT]:
             move_x = -1
-            player.direction = "LEFT"
+            rotate(player, "LEFT")
         elif pressed_keys[pg.K_RIGHT]:
             move_x = 1
-            player.direction = "RIGHT"
+            rotate(player, "RIGHT")
         else: move_x = 0
         if move_x == 0 and move_y == 0:
-            player.direction = "UP"
+            rotate(player, "UP")
 
     # entity calculating (movement, collisions, ect)
     move_screenbound(background, move_x, move_y)
