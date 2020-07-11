@@ -11,8 +11,7 @@ to run the game:
       - note that everything up to '>' is different for you and that is your current directory. Everything after the '>' is the command you are going to run
 
 ### File descriptions:
-- main.py: central program, run this to play
-- game_objects.py: module storing, defining and managing anything that needs to be displayed or moved in game (every object if you will)
-- settings.py: module for temporary storing of settings, should use .txt file later
-- PS.png: quick and dirty player sprite. 'Player Standing'
-- bg.png: quick adn dirty background... the lava and pixel effect was actually the hardest
+- ```main.py```: central program, run this to play
+- ```game_objects.py```: module storing, defining and managing anything that needs to be displayed or moved in game (every object if you will)
+- ```settings.py```: module for temporary storing of settings, should use .txt file later
+- ```Graphics``` folder: Contains various ```.png``` images ("sprites"). It's all the art for the game.
