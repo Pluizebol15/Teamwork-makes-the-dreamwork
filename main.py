@@ -70,7 +70,7 @@ def draw(): # frame drawing
 pg.init()  # start pygame
 gob.game_world.frame = 0  # add an attribute called 'frame' to the world, which keeps track on which point in the animation cycles the world is
 screen = pg.display.set_mode(settings.screen_size)  # create the game's application screen, stored in the var 'screen'
-player = gob.newentity('player', (800-72, 350+72), 1, graphics = loadsprite('P',"WC",9), graphics_size = (144,360)) # creates a new entity in the foreground
+player = gob.newentity('player', (800-72, 350+72), 1, graphics = loadsprite('WZ',"WC",5), graphics_size = (400,400)) # creates a new entity in the foreground
 background = gob.newentity('background', (0,-350), 0, graphics = loadsprite('BG2'), graphics_size = (1600*2,1600*2))  # creates a background entity
 
 # main loop
@@ -88,22 +88,22 @@ while run:  # actual loop
         if event.type == pg.QUIT: run = False; print("Event: QUIT")
         # movement keys
         pressed_keys = pg.key.get_pressed() # list of all keys that are pressed
-        if pressed_keys[pg.K_UP]:
-            move_y = -1
-            rotate(player, "UP")
-        elif pressed_keys[pg.K_DOWN]:
-            move_y = 1
-            rotate(player, "DOWN")
-        else: move_y = 0
-        if pressed_keys[pg.K_LEFT]:
+        if pressed_keys[pg.K_UP]:  # checks wether up arrow was pressed
+            move_y = -1  # set vertical movement sign to be negative (resulting in upward movement)
+            rotate(player, "UP")  # rotate the player sprites to face up
+        elif pressed_keys[pg.K_DOWN]:  # checks wether down arrow was pressed
+            move_y = 1  # set vertical movement sign to be positive (== downward movement)
+            rotate(player, "DOWN")  # rotate player sprites to face down
+        else: move_y = 0  # if no vertical movement keys were pressed, multipy vertical movement by 0, so don't move up or down
+        if pressed_keys[pg.K_LEFT]:  # checks wether left arrow was pressed
             move_x = -1
             rotate(player, "LEFT")
-        elif pressed_keys[pg.K_RIGHT]:
+        elif pressed_keys[pg.K_RIGHT]:  # check wether right arrow was pressed
             move_x = 1
             rotate(player, "RIGHT")
         else: move_x = 0
-        if move_x == 0 and move_y == 0:
-            rotate(player, "UP")
+        if move_x == 0 and move_y == 0:  # if the player is not moving...
+            rotate(player, "UP")  # ...rotate the player to face up
 
     # entity calculating (movement, collisions, ect)
     move_screenbound(background, move_x, move_y)

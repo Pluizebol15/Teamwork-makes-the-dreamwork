@@ -26,6 +26,8 @@ checked for collisions every tick
 
 '''
 
+import settings
+
 entity_world = []     # collection of all entities, sorted by age (descending)
 collision_world = []  # collection of all collision objects, unsorted
 
@@ -47,7 +49,7 @@ class entity:
         self.graphics = graphics  # optional list of spites for animation/drawing
         self.age = None # integer nr of frames since the object appeared on the screen
         self.cycle_cur = 0  # frame in an optional cycle that should be drawn
-        self.cycle_len = 9  # length of the optional cycle that should be drawn (defealt 9)
+        self.cycle_len = settings.cycle_len  # length of the optional cycle that should be drawn (defealt 9)
         self.lifetime = lifetime # nr of maximum frames the object is allowed to appear
         self.layer = layer  # draw layer the sprite should be drawn to.
 
