@@ -48,11 +48,23 @@ class entity:
         self.center = [location[0]+graphics_size[0]/2, location[1]+graphics_size[1]/2]  # center of the entity
         self.size = (graphics_size[0], graphics_size[1])  # size of the graphics images in forward position
         self.graphics = graphics  # optional list of spites for animation/drawing
-        self.age = None # integer nr of frames since the object appeared on the screen
+        self.age = 0 # integer nr of frames since the object appeared on the screen
         self.cycle_cur = 0  # frame in an optional cycle that should be drawn
         self.cycle_len = settings.cycle_len  # length of the optional cycle that should be drawn (defealt 9)
         self.lifetime = lifetime # nr of maximum frames the object is allowed to appear
         self.layer = layer  # draw layer the sprite should be drawn to.
+
+        self.shoottrigger = True  # controller that prevents long human button presses from re-triggering a shoot
+    def shoot(self):  # fires a projectile. This will be moved to a weapons class later
+        if self.shoottrigger:  # if a weapon should fire (sapwn an arrow sprite 'particle')
+            print('POW')
+            return True
+        else:
+            print('NO BUENO ME AMIGO')
+            return False
+
+    def fliptrigger(self):  # switches the triggerstate of a weapon, allowing it to fire, or not
+        self.shoottrigger = True if not self.shoottrigger else False  # flips the trigger state between True and False
 
     def centerupdate(self):  # updates the center of image attribute of the entity
         self.center = [self.loc[0] + self.size[0]/2, self.loc[1] + self.size[1]/2]  # updates center of the entity

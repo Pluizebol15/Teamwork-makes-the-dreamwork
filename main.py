@@ -19,6 +19,11 @@ def loadsprite(EntityLetter, cycletype=None, cyclelen=None):
         return returnlist
     else: return [pg.image.load(f".\Graphics\{EntityLetter}.png")]
 
+def particle_spawn(parent):
+    newpart = gob.newentity(f"arrow",parent.loc, 1, graphics=loadsprite('ARF','F',4),graphics_size=(111,19),lifetime = 24)
+    newpart.cycle_len = 4
+
+
 def move(entity, x=0, y=0):  # change location of an entity in direction of the movement keys, NOT bound by the screen edge
     entity.loc[0] = entity.loc[0] + x*settings.player_speed  # change x
     entity.loc[1] = entity.loc[1] + y*settings.player_speed  # change y
@@ -71,6 +76,13 @@ def draw(): # frame drawing
     pg.display.update() # send update to screen
 
 def worldsprite_update(reset_ent = None):  # globally updates which sprite of cycles should be loaded
+    # age cycle updates
+    for ent in gob.entity_world:
+        ent.age = ent.age+1  # increment age counter of all sprites
+        if ent.lifetime:
+            if ent.age > ent.lifetime: gob.entity_world.remove(ent)  # remove over aged sprites, I dont like old cheeses!
+
+    # animation cycle updates
     if gob.game_world.frame == settings.spritespeed:
             for ent in gob.entity_world:
                 if reset_ent:
@@ -78,12 +90,13 @@ def worldsprite_update(reset_ent = None):  # globally updates which sprite of cy
                     reset = True if (reset_ent[0].name == ent.name) and reset_ent[1] else False
                 ent.cycle_update(reset)
 
-
+# (800-180, 350) < this works... but really shouldn't
+# (800-72, 350-180) < this somehow doesnt work... but it should...
 
 # window + program setup
 pg.init()  # start pygame
 screen = pg.display.set_mode(settings.screen_size)  # create the game's application screen, stored in the var 'screen'
-player = gob.newentity('player', (800-180, 350), 1, graphics = loadsprite('WZ',"WC",5), graphics_size = (144,360)) # creates a new entity in the foreground
+player = gob.newentity('player', (800-180, 350), 1, graphics = loadsprite('WZ',"WC",7), graphics_size = (144,360)) # creates a new entity in the foreground
 background = gob.newentity('background', (0,-350), 0, graphics = loadsprite('BG2'), graphics_size = (1600*2,1600*2))  # creates a background entity
 
 # main loop
@@ -118,10 +131,13 @@ while run:  # actual loop
         if move_x == 0 and move_y == 0:  # if the player is not moving...
             rotate(player, "UP")  # ...rotate the player to face up
         # mouse click handling
-        if event.type == pg.MOUSEBUTTONUP:
+        if event.type == pg.MOUSEBUTTONDOWN:
             mouse_pos = pg.mouse.get_pos()
-            Shootprojectile = True
-        else: Shootprojectile = False
+            if player.shoot():  # trigger the spawn of a projectile
+                particle_spawn(player)
+            player.fliptrigger()  # make sure that you can only fire once per mouseclick
+        if event.type == pg.MOUSEBUTTONUP:
+            player.fliptrigger()  # make sure that you can only fire once per mouseclick
 
     # entity calculating (movement, collisions, ect)
     worldsprite_update((player, move_screenbound(background, move_x, move_y)[1]))
