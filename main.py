@@ -19,18 +19,22 @@ def loadsprite(EntityLetter, cycletype=None, cyclelen=None):
         return returnlist
     else: return [pg.image.load(f".\Graphics\{EntityLetter}.png")]
 
-def move(entity, x=0, y=0):  # change location of an entity
-    # THIS function IS NOT FUNCTIONAL ==> USE MOVE_SCREENBOUND FOR NOW
+def move(entity, x=0, y=0):  # change location of an entity in direction of the movement keys, NOT bound by the screen edge
     entity.loc[0] = entity.loc[0] + x*settings.player_speed  # change x
     entity.loc[1] = entity.loc[1] + y*settings.player_speed  # change y
-    entity.centerupdate()  # update entities center
+    moved = True if (x,y) != (0,0) else False  # sets a variable to remember wether the move was succesfull
 
-def move_screenbound(entity, x=0, y=0):  # move the background sprite in opposite direction to fake movement
+    if moved: entity.centerupdate()  # update entities center
+    reset = True if not moved else False  # define wether to reset the animation cycle
+    #print(f"move_screenbound: reset = {reset}")
+    return (entity, reset)
+
+def move_screenbound(entity, x=0, y=0):  # move the sprite opposite to the movement direction key, bound by screen bounds
     entity.loc[0] = entity.loc[0] - x*settings.player_speed  # change x
     entity.loc[1] = entity.loc[1] - y*settings.player_speed  # change y
     moved = True if (x,y) != (0,0) else False  # sets a variable to remember wether the move was succesfull
-    if moved: entity.centerupdate()  # update entities center
 
+    # limit the movement to the screen size
     if (entity.loc[0] > 0) or (entity.loc[0] < -1*(entity.size[0]-settings.screen_size[0])):
         entity.loc[0] = entity.loc[0] + x*settings.player_speed  # change x back
         moved = False
@@ -38,9 +42,10 @@ def move_screenbound(entity, x=0, y=0):  # move the background sprite in opposit
         entity.loc[1] = entity.loc[1] + y*settings.player_speed  # change y back
         moved = False
 
-    if moved:
-        if gob.game_world.frame == 3: player.cycle_update()  # update which sprite to render in animation cycle
-    else: player.cycle_cur = 0  # reset animation cycle if player didn't move
+    if moved: entity.centerupdate()  # update entities center
+    reset = True if not moved else False  # define wether to reset the animation cycle
+    #print(f"move_screenbound: reset = {reset}")
+    return (entity, reset)
 
 def rotate(entity, newdirection):
     angles = {"UP" : 0, "RIGHT" : -90, "DOWN" : 180, "LEFT" : 90}  # angle of the sprite, clockwise
@@ -65,12 +70,20 @@ def draw(): # frame drawing
                 screen.blit(ent.graphics[ent.cycle_cur], (ent.loc[0],ent.loc[1]))
     pg.display.update() # send update to screen
 
+def worldsprite_update(reset_ent = None):  # globally updates which sprite of cycles should be loaded
+    if gob.game_world.frame == settings.spritespeed:
+            for ent in gob.entity_world:
+                if reset_ent:
+                    #print(f"wsu:\n\tresetarg:{reset_ent}",end='\n')
+                    reset = True if (reset_ent[0].name == ent.name) and reset_ent[1] else False
+                ent.cycle_update(reset)
+
+
 
 # window + program setup
 pg.init()  # start pygame
-gob.game_world.frame = 0  # add an attribute called 'frame' to the world, which keeps track on which point in the animation cycles the world is
 screen = pg.display.set_mode(settings.screen_size)  # create the game's application screen, stored in the var 'screen'
-player = gob.newentity('player', (800-72, 350+72), 1, graphics = loadsprite('WZ',"WC",5), graphics_size = (400,400)) # creates a new entity in the foreground
+player = gob.newentity('player', (800-180, 350), 1, graphics = loadsprite('WZ',"WC",5), graphics_size = (144,360)) # creates a new entity in the foreground
 background = gob.newentity('background', (0,-350), 0, graphics = loadsprite('BG2'), graphics_size = (1600*2,1600*2))  # creates a background entity
 
 # main loop
@@ -84,9 +97,9 @@ while run:  # actual loop
 
     # events
     for event in pg.event.get():
-        # quit button
+        # quit button handling
         if event.type == pg.QUIT: run = False; print("Event: QUIT")
-        # movement keys
+        # movement key handling
         pressed_keys = pg.key.get_pressed() # list of all keys that are pressed
         if pressed_keys[pg.K_UP]:  # checks wether up arrow was pressed
             move_y = -1  # set vertical movement sign to be negative (resulting in upward movement)
@@ -104,9 +117,14 @@ while run:  # actual loop
         else: move_x = 0
         if move_x == 0 and move_y == 0:  # if the player is not moving...
             rotate(player, "UP")  # ...rotate the player to face up
+        # mouse click handling
+        if event.type == pg.MOUSEBUTTONUP:
+            mouse_pos = pg.mouse.get_pos()
+            Shootprojectile = True
+        else: Shootprojectile = False
 
     # entity calculating (movement, collisions, ect)
-    move_screenbound(background, move_x, move_y)
+    worldsprite_update((player, move_screenbound(background, move_x, move_y)[1]))
 
     # screen update (clears prev draws, and draws the new data)
     draw()

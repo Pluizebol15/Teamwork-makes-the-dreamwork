@@ -35,7 +35,8 @@ collision_world = []  # collection of all collision objects, unsorted
 # NOTE: attributes are assigned as needed, and removed as needed, please manage this manually!
 # NOTE2: only ONE instance of this class should exists: 'game_world'!!!!
 class world:
-    pass
+    def __init__(self):
+        self.frame = 0  # keeps track of time in the world
 game_world = world()
 # class that contains neccecary information to draw something on the screen
 class entity:
@@ -56,9 +57,12 @@ class entity:
     def centerupdate(self):  # updates the center of image attribute of the entity
         self.center = [self.loc[0] + self.size[0]/2, self.loc[1] + self.size[1]/2]  # updates center of the entity
 
-    def cycle_update(self):  # updates any cycles present in the entity attributes
-        if self.cycle_cur+1 >= self.cycle_len: self.cycle_cur = 0
-        else: self.cycle_cur = self.cycle_cur+1
+    def cycle_update(self, reset=False):  # updates any cycles present in the entity attributes
+        if game_world.frame == settings.spritespeed:
+            if self.cycle_cur+1 >= self.cycle_len: self.cycle_cur = 0
+            else: self.cycle_cur = self.cycle_cur+1
+        if reset: self.cycle_cur = 0
+
 
 # entity class that has collision bounds
 class collisob(entity):
