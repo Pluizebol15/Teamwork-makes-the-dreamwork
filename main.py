@@ -19,10 +19,40 @@ def loadsprite(EntityLetter, cycletype=None, cyclelen=None):
         return returnlist
     else: return [pg.image.load(f".\Graphics\{EntityLetter}.png")]
 
-def particle_spawn(parent):
-    newpart = gob.newentity(f"arrow",parent.loc, 1, graphics=loadsprite('ARF','F',4),graphics_size=(111,19),lifetime = 24)
+# spawn a small sprite at the parents origin, and adds the sprite to the collection
+def particle_spawn(parent, collection):
+    newpart = gob.Entity(f"arrow",parent.loc, 1, collection, graphics=loadsprite('ARF','F',4),graphics_size=(111,19),lifetime = 24)
     newpart.cycle_len = 4
 
+# moves entities (or entire collections of) according to a specific curve, along a specified direction
+def particle_move(collection = "MAIN", curve_coefficient = 0, direction = "UP"):
+    if (collection not in gob.Entity.collections) and (len(gob.Entity.collections) != 1): raise ValueError (f"Unknown collection '{collection}'")
+    if direction not in ["UP","DOWN","LEFT","RIGHT"]: raise ValueError (f"Unknown direction '{direction}'")
+    if curve_coefficient not in range(3): raise ValueError (f"Invalid curve_coefficient '{curve_coefficient}', should be 0, 1 or 2")
+
+    for part in gob.entity_world:
+        if (part.collection != collection) and (collection != "MAIN"): continue  # check the collection if required
+
+        # so... turn out... the arrow sprite's are oriented like 'if they were shooting to the right'
+        # thats an issue, cuz the rotation function assumes a 'if they were looking up' rotation as defealt
+        # so we need to map the actual orientation of the sprite's head, to the expected orientation of the sprite's head
+        # this means transform tables... yay... We should agree upon these kind of things, or coce a permanent, elagent solution for it...
+        rot_dir_transform = {"UP":"LEFT", "DOWN":"RIGHT","LEFT":"DOWN","RIGHT":"UP"}
+        rot_dir = rot_dir_transform[direction]
+        rotate(part, rot_dir)
+        if direction == "UP":
+            move(part, x = 0, y = -2)
+        if direction == "DOWN":
+            move(part, x = 0, y = 2)
+        if direction == "LEFT":
+            move(part, x = -2, y = 0)
+        if direction == "RIGHT":
+            move(part, x = 2, y = 0)
+
+def getgloballoc(entity):
+    print(result)
+    result = (entity.loc[0], entity.loc[1])
+    return result
 
 def move(entity, x=0, y=0):  # change location of an entity in direction of the movement keys, NOT bound by the screen edge
     entity.loc[0] = entity.loc[0] + x*settings.player_speed  # change x
@@ -96,8 +126,8 @@ def worldsprite_update(reset_ent = None):  # globally updates which sprite of cy
 # window + program setup
 pg.init()  # start pygame
 screen = pg.display.set_mode(settings.screen_size)  # create the game's application screen, stored in the var 'screen'
-player = gob.newentity('player', (800-180, 350), 1, graphics = loadsprite('WZ',"WC",7), graphics_size = (144,360)) # creates a new entity in the foreground
-background = gob.newentity('background', (0,-350), 0, graphics = loadsprite('BG2'), graphics_size = (1600*2,1600*2))  # creates a background entity
+player = gob.Entity('player', (800-180, 350), 1, "MAIN", graphics = loadsprite('WZ',"WC",7), graphics_size = (144,360)) # creates a new entity in the foreground
+background = gob.Entity('background', (0,-350), 0, "MAIN", graphics = loadsprite('BG2'), graphics_size = (1600*2,1600*2))  # creates a background entity
 
 # main loop
 clock = pg.time.Clock()  # game clock, controls framerate
@@ -134,13 +164,14 @@ while run:  # actual loop
         if event.type == pg.MOUSEBUTTONDOWN:
             mouse_pos = pg.mouse.get_pos()
             if player.shoot():  # trigger the spawn of a projectile
-                particle_spawn(player)
+                particle_spawn(player, "ARROW")
             player.fliptrigger()  # make sure that you can only fire once per mouseclick
         if event.type == pg.MOUSEBUTTONUP:
             player.fliptrigger()  # make sure that you can only fire once per mouseclick
 
     # entity calculating (movement, collisions, ect)
     worldsprite_update((player, move_screenbound(background, move_x, move_y)[1]))
+    particle_move(collection = "ARROW", direction = player.direction)
 
     # screen update (clears prev draws, and draws the new data)
     draw()

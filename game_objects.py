@@ -34,14 +34,23 @@ collision_world = []  # collection of all collision objects, unsorted
 # class that stores information needed for entity interactions and dependency
 # NOTE: attributes are assigned as needed, and removed as needed, please manage this manually!
 # NOTE2: only ONE instance of this class should exists: 'game_world'!!!!
-class world:
+class World:
     def __init__(self):
-        self.frame = 0  # keeps track of time in the world
-game_world = world()
+        self.frame = 0  # keeps track of time in the world / animation speed
+        self.time = 0 # nr of frames since start
+game_world = World()
 # class that contains neccecary information to draw something on the screen
-class entity:
-    def __init__(self, name, location, layer, graphics=[None], graphics_size=None, lifetime=None):
+class Entity:
+    # class statistics
+    collections = ["MAIN"]
+
+    def __init__(self, name, location, layer, collection, graphics=[None], graphics_size=None, lifetime=None):
         if graphics and not graphics_size: raise ValueError ("graphics specified but no size was given!")
+
+        global entity_world
+        entity_world.append(self)  # append entity to world
+        if collection not in Entity.collections: Entity.collections.append(collection)
+
         self.name = name  # name of the entity
         self.loc = [location[0], location[1]]  # coördinates of the entity [x, y]
         self.direction = "UP"  # facing direction of the entity, defealt to up
@@ -53,8 +62,10 @@ class entity:
         self.cycle_len = settings.cycle_len  # length of the optional cycle that should be drawn (defealt 9)
         self.lifetime = lifetime # nr of maximum frames the object is allowed to appear
         self.layer = layer  # draw layer the sprite should be drawn to.
+        self.collection = collection  # 'group' the sprite belongs to. Mostly used for particles, all solo sprites should be assigned to "MAIN"
 
         self.shoottrigger = True  # controller that prevents long human button presses from re-triggering a shoot
+
     def shoot(self):  # fires a projectile. This will be moved to a weapons class later
         if self.shoottrigger:  # if a weapon should fire (sapwn an arrow sprite 'particle')
             print('POW')
@@ -77,7 +88,7 @@ class entity:
 
 
 # entity class that has collision bounds
-class collisob(entity):
+class Collisob(Entity):
     def __init__(self, name, location, layer, size, graphics=None,graphics_size=None, lifetime=None):
         super.__init__(self, name, location, layer, graphics, lifetime)
         self.coll = [  # collision points for the object (corners, clockwise)
@@ -87,20 +98,5 @@ class collisob(entity):
             (self.loc[0], self.loc[1]+size[1])  # left lower corner
         ]
 
-def newentity(name, location, layer, graphics=[None], graphics_size=None, lifetime=None):
-    global entity_world
-    newitem = entity(name, location, layer, graphics, graphics_size, lifetime)  # create new entity
-    entity_world.append(newitem)  # append entity to world
-    return newitem
-
 if __name__ == '__main__':
-    ent1 = newentity('ent1',(0,0), 1)
-    print(f"world: {entity_world}")
-    for ent in entity_world:
-        print(f"  {ent.name}  '{ent.age}'")
-    ent1.age = 30
-    ent2 = newentity('ent2',(30,0), 1)
-    ent2.age = 20
-    print(f"world: {entity_world}")
-    for ent in entity_world:
-        print(f"  {ent.name}  '{ent.age}'")
+    pass
