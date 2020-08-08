@@ -1,5 +1,6 @@
 # Teamwork-makes-the-dreamwork
 
+
 ### note: to run game
 to run the game:
 - clone/download  + extract github
@@ -15,3 +16,4 @@ to run the game:
 - ```game_objects.py```: module storing, defining and managing anything that needs to be displayed or moved in game (every object if you will)
 - ```settings.py```: module for temporary storing of settings, should use .txt file later
 - ```Graphics``` folder: Contains various ```.png``` images ("sprites"). It's all the art for the game.
+
